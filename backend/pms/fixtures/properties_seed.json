@@ -1,0 +1,452 @@
+[
+  {
+    "model": "pms.property",
+    "pk": "a12664c3-b6c8-41b1-8e8b-ac2574f58b6a",
+    "fields": {
+      "name": "Apartment #10",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "d21fc407-f82c-44ba-9d13-c50f795b2c0a",
+    "fields": {
+      "name": "Apartment #11",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "bcf0f795-a73a-4295-8fb3-a947fc86ef2b",
+    "fields": {
+      "name": "Apartment #12",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "e9b0eba4-7e24-4222-a815-235824e148c8",
+    "fields": {
+      "name": "Apartment #13",
+      "unit_code": "",
+      "address": "Home in Prishtina, Kosovo",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "b0fe8a6b-63d7-4e21-851c-be2be4dec0c7",
+    "fields": {
+      "name": "Apartment #14",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 3,
+      "max_guests": 2,
+      "base_price_eur": "62.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "bda129c8-e93e-41ae-9cd5-3c43639e563c",
+    "fields": {
+      "name": "Apartment #15",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "450ebf0d-01d7-4a6b-9b4a-f836cb9acb86",
+    "fields": {
+      "name": "Apartment #16",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "6376aa70-2374-446e-870c-95e5bcfa0bd0",
+    "fields": {
+      "name": "Apartment #17",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "16b7ce7b-7fb5-4280-b272-cd0103d41127",
+    "fields": {
+      "name": "Apartment #18",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "0b0e72d3-bc4c-4948-9920-82405dac1b0d",
+    "fields": {
+      "name": "Apartment #19",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "0373e35b-2668-48ea-a5cd-666f8c8c48cb",
+    "fields": {
+      "name": "Apartment #2",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 3,
+      "max_guests": 2,
+      "base_price_eur": "62.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "6a1a3b50-e031-4d9b-ab80-358fecb996cf",
+    "fields": {
+      "name": "Apartment #21",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "233f484d-b424-4640-8998-661ce49f8ce7",
+    "fields": {
+      "name": "Apartment #22",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "01449592-9a21-461b-b587-dfab5682835d",
+    "fields": {
+      "name": "Apartment #24",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "8589941f-bcb9-4a83-a908-0624e4e665d5",
+    "fields": {
+      "name": "Apartment #25",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "0af07a78-859f-4e13-9a42-2d9fb00a0e5c",
+    "fields": {
+      "name": "Apartment #27",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "8590b08b-ca85-44c8-9de4-bc8f70cb815f",
+    "fields": {
+      "name": "Apartment #28",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "8c158504-64c8-4685-ac69-da4987703f44",
+    "fields": {
+      "name": "Apartment #29",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "fc75571a-1352-46ca-9d2d-dc39e8d206a0",
+    "fields": {
+      "name": "Apartment #3",
+      "unit_code": "",
+      "address": "Home in Prishtina, Kosovo",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "63842bb8-2daa-4806-ab09-38bc4e85d9aa",
+    "fields": {
+      "name": "Apartment #30",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "332608eb-7d52-45f4-ba4a-d55b784c09a9",
+    "fields": {
+      "name": "Apartment #4",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "e70219cc-e03f-411e-998e-ff8a202f2f54",
+    "fields": {
+      "name": "Apartment #5",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "f0c5390c-493f-484a-98ca-3045f9efb350",
+    "fields": {
+      "name": "Apartment #6",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "a80e6bfe-4417-45fe-a38a-c5bbbc984842",
+    "fields": {
+      "name": "Apartment #7",
+      "unit_code": "",
+      "address": "Home in Prishtina, Kosovo",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "252b9495-ce4f-4b8e-9adc-a639ec9d79f2",
+    "fields": {
+      "name": "Apartment #8",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 3,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "a19387e3-6e85-4fe8-ad07-846be4962bcc",
+    "fields": {
+      "name": "Apartment #9",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 1,
+      "max_guests": 2,
+      "base_price_eur": "35.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "b0c61ccf-4aa7-4e07-a0a5-cdded2eabe43",
+    "fields": {
+      "name": "Apartment #H1 B12",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "f9e85794-8fa6-49d4-90d7-8d57a3148960",
+    "fields": {
+      "name": "Apartment #H1B11",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "60.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "1034e640-4d19-4784-bcc3-e827859c7b2d",
+    "fields": {
+      "name": "Apartment #R10 B16",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  },
+  {
+    "model": "pms.property",
+    "pk": "a32af91c-f771-4dcf-b2f7-a03dd3e75d76",
+    "fields": {
+      "name": "Apartment #R10 B9",
+      "unit_code": "",
+      "address": "",
+      "apartment_type": "",
+      "bedrooms": 2,
+      "max_guests": 2,
+      "base_price_eur": "45.00",
+      "notes": "",
+      "active": true
+    }
+  }
+]
