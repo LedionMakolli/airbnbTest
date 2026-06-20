@@ -1,4 +1,4 @@
-import { ArrowRight, Check, RefreshCw, Search, X } from 'lucide-react'
+import { ArrowRight, Check, Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { fetchProperties, fetchReservations, updateReservation } from '../api/pmsApi'

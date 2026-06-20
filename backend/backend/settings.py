@@ -22,7 +22,7 @@ if _debug_from_environment and _debug_from_environment.lower() not in {
 
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
 PUBLIC_BASE_URL = config('PUBLIC_BASE_URL', default='')
 
 INSTALLED_APPS = [
@@ -66,8 +66,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-DATABASES = {
-    'default': {
+DB_ENGINE = config('DB_ENGINE', default='sqlite')
+
+if DB_ENGINE == 'postgresql':
+    default_database = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME', default='pmsdb'),
         'USER': config('DB_USER', default='postgres'),
@@ -75,6 +77,18 @@ DATABASES = {
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
     }
+else:
+    sqlite_name = Path(config('SQLITE_NAME', default='db.sqlite3'))
+    if not sqlite_name.is_absolute():
+        sqlite_name = BASE_DIR / sqlite_name
+
+    default_database = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': sqlite_name,
+    }
+
+DATABASES = {
+    'default': default_database,
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -97,3 +111,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
 CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+SESSION_COOKIE_SAMESITE = config('SESSION_COOKIE_SAMESITE', default='Lax')
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
+CSRF_COOKIE_SAMESITE = config('CSRF_COOKIE_SAMESITE', default='Lax')

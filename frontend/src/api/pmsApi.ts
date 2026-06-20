@@ -31,6 +31,25 @@ function activePlatform(): string {
   return localStorage.getItem('pms.platform') || 'airstay'
 }
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+
+function apiUrl(input: RequestInfo | URL) {
+  if (typeof input !== 'string') {
+    return input
+  }
+  if (!API_BASE_URL || /^https?:\/\//i.test(input)) {
+    return input
+  }
+  return `${API_BASE_URL}${input}`
+}
+
+function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+  return fetch(apiUrl(input), {
+    credentials: 'include',
+    ...init,
+  })
+}
+
 async function readJson<T>(response: Response): Promise<T> {
   const rawBody = await response.text()
   const data = rawBody ? (JSON.parse(rawBody) as T) : ({} as T)
@@ -42,16 +61,16 @@ async function readJson<T>(response: Response): Promise<T> {
   return data
 }
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchCurrentUser() {
-  const response = await fetch('/api/auth/me/')
+  const response = await apiFetch('/api/auth/me/')
   const data = await readJson<{ user: AuthUser }>(response)
   return data.user
 }
 
 export async function loginUser(payload: { username: string; password: string }) {
-  const response = await fetch('/api/auth/login/', {
+  const response = await apiFetch('/api/auth/login/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -61,21 +80,21 @@ export async function loginUser(payload: { username: string; password: string })
 }
 
 export async function logoutUser() {
-  const response = await fetch('/api/auth/logout/', { method: 'POST' })
+  const response = await apiFetch('/api/auth/logout/', { method: 'POST' })
   const data = await readJson<{ user: AuthUser }>(response)
   return data.user
 }
 
-// ── Users ────────────────────────────────────────────────────────────────────
+// â”€â”€ Users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchUsers() {
-  const response = await fetch('/api/users/')
+  const response = await apiFetch('/api/users/')
   const data = await readJson<{ users: ManagedUser[] }>(response)
   return data.users
 }
 
 export async function createUserAccount(payload: UserAccountPayload) {
-  const response = await fetch('/api/users/', {
+  const response = await apiFetch('/api/users/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -85,7 +104,7 @@ export async function createUserAccount(payload: UserAccountPayload) {
 }
 
 export async function updateUserAccount(id: number, payload: UserAccountPayload) {
-  const response = await fetch(`/api/users/${id}/`, {
+  const response = await apiFetch(`/api/users/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -94,12 +113,12 @@ export async function updateUserAccount(id: number, payload: UserAccountPayload)
   return data.user
 }
 
-// ── Properties ────────────────────────────────────────────────────────────────
+// â”€â”€ Properties â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchProperties(includeInactive = false) {
   const params = new URLSearchParams({ platform: activePlatform() })
   if (includeInactive) params.set('includeInactive', '1')
-  const response = await fetch(`/api/properties/?${params.toString()}`)
+  const response = await apiFetch(`/api/properties/?${params.toString()}`)
   const data = await readJson<{ properties: PropertyListing[] }>(response)
   return data.properties
 }
@@ -121,7 +140,7 @@ export async function createProperty(payload: PropertyPayload) {
     formData.append('photo', payload.photo)
   }
 
-  const response = await fetch('/api/properties/', {
+  const response = await apiFetch('/api/properties/', {
     method: 'POST',
     body: formData,
   })
@@ -149,11 +168,11 @@ export async function updateProperty(id: string, payload: PropertyEditPayload) {
     formData.append('description', extraFields.description)
     formData.append('listingActive', extraFields.listingActive ? 'true' : 'false')
     if (payload.maxGuests !== undefined) formData.append('maxGuests', String(payload.maxGuests))
-    const response = await fetch(`/api/properties/${id}/`, { method: 'PATCH', body: formData })
+    const response = await apiFetch(`/api/properties/${id}/`, { method: 'PATCH', body: formData })
     const data = await readJson<{ property: PropertyListing }>(response)
     return data.property
   }
-  const response = await fetch(`/api/properties/${id}/`, {
+  const response = await apiFetch(`/api/properties/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -172,14 +191,14 @@ export async function updateProperty(id: string, payload: PropertyEditPayload) {
 }
 
 export async function deleteProperty(id: string) {
-  const response = await fetch(`/api/properties/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/properties/${id}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not delete property.')
   }
 }
 
 export async function updatePropertySync(id: string, payload: PropertySyncPayload) {
-  const response = await fetch(`/api/properties/${id}/`, {
+  const response = await apiFetch(`/api/properties/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -189,7 +208,7 @@ export async function updatePropertySync(id: string, payload: PropertySyncPayloa
 }
 
 export async function syncPropertyCalendar(id: string, channel: 'airbnb' | 'booking') {
-  const response = await fetch(`/api/properties/${id}/sync/`, {
+  const response = await apiFetch(`/api/properties/${id}/sync/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ channel }),
@@ -204,7 +223,7 @@ export async function syncPropertyCalendar(id: string, channel: 'airbnb' | 'book
   }>(response)
 }
 
-// ── Reservations ──────────────────────────────────────────────────────────────
+// â”€â”€ Reservations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchReservations(filters?: { month: number; propertyId?: string; year: number; archived?: boolean }) {
   const params = new URLSearchParams()
@@ -219,7 +238,7 @@ export async function fetchReservations(filters?: { month: number; propertyId?: 
       params.set('archived', '1')
     }
   }
-  const response = await fetch(`/api/reservations/?${params.toString()}`)
+  const response = await apiFetch(`/api/reservations/?${params.toString()}`)
   const data = await readJson<{ reservations: ReservationRecord[] }>(response)
   return data.reservations
 }
@@ -230,13 +249,13 @@ export async function fetchArchivedReservations(filters?: { month?: number; year
   params.set('archived', '1')
   if (filters?.year) params.set('year', String(filters.year))
   if (filters?.month) params.set('month', String(filters.month))
-  const response = await fetch(`/api/reservations/?${params.toString()}`)
+  const response = await apiFetch(`/api/reservations/?${params.toString()}`)
   const data = await readJson<{ reservations: ReservationRecord[] }>(response)
   return data.reservations
 }
 
 export async function createReservation(payload: ReservationPayload) {
-  const response = await fetch('/api/reservations/', {
+  const response = await apiFetch('/api/reservations/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -246,7 +265,7 @@ export async function createReservation(payload: ReservationPayload) {
 }
 
 export async function updateReservation(id: string, payload: ReservationPayload) {
-  const response = await fetch(`/api/reservations/${id}/`, {
+  const response = await apiFetch(`/api/reservations/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -256,33 +275,33 @@ export async function updateReservation(id: string, payload: ReservationPayload)
 }
 
 export async function deleteReservation(id: string) {
-  const response = await fetch(`/api/reservations/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/reservations/${id}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not archive reservation.')
   }
 }
 
 export async function permanentDeleteReservation(id: string) {
-  const response = await fetch(`/api/reservations/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/reservations/${id}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not permanently delete reservation.')
   }
 }
 
 export async function restoreReservation(id: string) {
-  const response = await fetch(`/api/reservations/${id}/restore/`, { method: 'POST' })
+  const response = await apiFetch(`/api/reservations/${id}/restore/`, { method: 'POST' })
   const data = await readJson<{ reservation: ReservationRecord }>(response)
   return data.reservation
 }
 
 export async function fetchReservationHistory(id: string) {
-  const response = await fetch(`/api/reservations/${id}/history/`)
+  const response = await apiFetch(`/api/reservations/${id}/history/`)
   const data = await readJson<{ history: ReservationAuditEntry[] }>(response)
   return data.history
 }
 
 export async function fetchReservationAttachments(reservationId: string) {
-  const response = await fetch(`/api/reservations/${reservationId}/attachments/`)
+  const response = await apiFetch(`/api/reservations/${reservationId}/attachments/`)
   const data = await readJson<{ attachments: ReservationAttachment[] }>(response)
   return data.attachments
 }
@@ -290,7 +309,7 @@ export async function fetchReservationAttachments(reservationId: string) {
 export async function uploadReservationAttachment(reservationId: string, file: File) {
   const formData = new FormData()
   formData.append('file', file)
-  const response = await fetch(`/api/reservations/${reservationId}/attachments/`, {
+  const response = await apiFetch(`/api/reservations/${reservationId}/attachments/`, {
     method: 'POST',
     body: formData,
   })
@@ -299,7 +318,7 @@ export async function uploadReservationAttachment(reservationId: string, file: F
 }
 
 export async function deleteReservationAttachment(reservationId: string, attachmentId: string) {
-  const response = await fetch(`/api/reservations/${reservationId}/attachments/${attachmentId}/`, {
+  const response = await apiFetch(`/api/reservations/${reservationId}/attachments/${attachmentId}/`, {
     method: 'DELETE',
   })
   if (!response.ok) {
@@ -307,16 +326,16 @@ export async function deleteReservationAttachment(reservationId: string, attachm
   }
 }
 
-// ── Access Codes ──────────────────────────────────────────────────────────────
+// â”€â”€ Access Codes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchDoorCodes() {
-  const response = await fetch('/api/codes/door/')
+  const response = await apiFetch('/api/codes/door/')
   const data = await readJson<{ doorCodes: DoorCodeRecord[] }>(response)
   return data.doorCodes
 }
 
 export async function updateDoorCode(id: string, payload: DoorCodePayload) {
-  const response = await fetch(`/api/codes/door/${id}/`, {
+  const response = await apiFetch(`/api/codes/door/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -326,13 +345,13 @@ export async function updateDoorCode(id: string, payload: DoorCodePayload) {
 }
 
 export async function fetchLockboxCodes() {
-  const response = await fetch('/api/codes/lockboxes/')
+  const response = await apiFetch('/api/codes/lockboxes/')
   const data = await readJson<{ lockboxCodes: LockboxCodeRecord[] }>(response)
   return data.lockboxCodes
 }
 
 export async function createLockboxCode(payload: LockboxCodePayload) {
-  const response = await fetch('/api/codes/lockboxes/', {
+  const response = await apiFetch('/api/codes/lockboxes/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -342,7 +361,7 @@ export async function createLockboxCode(payload: LockboxCodePayload) {
 }
 
 export async function updateLockboxCode(id: string, payload: LockboxCodePayload) {
-  const response = await fetch(`/api/codes/lockboxes/${id}/`, {
+  const response = await apiFetch(`/api/codes/lockboxes/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -352,19 +371,19 @@ export async function updateLockboxCode(id: string, payload: LockboxCodePayload)
 }
 
 export async function deleteLockboxCode(id: string) {
-  const response = await fetch(`/api/codes/lockboxes/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/codes/lockboxes/${id}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not delete lockbox code.')
   }
 }
 
-// ── Finance ───────────────────────────────────────────────────────────────────
+// â”€â”€ Finance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchFinanceSummary(filters: { month: number; year: number }) {
   const params = new URLSearchParams()
   params.set('year', String(filters.year))
   params.set('month', String(filters.month))
-  const response = await fetch(`/api/finance/summary/?${params.toString()}`)
+  const response = await apiFetch(`/api/finance/summary/?${params.toString()}`)
   return readJson<{
     summary: FinanceSummary
     expenses: FinanceExpenseRecord[]
@@ -374,13 +393,13 @@ export async function fetchFinanceSummary(filters: { month: number; year: number
 }
 
 export async function fetchExpenseCategories() {
-  const response = await fetch('/api/finance/categories/')
+  const response = await apiFetch('/api/finance/categories/')
   const data = await readJson<{ categories: ExpenseCategoryRecord[] }>(response)
   return data.categories
 }
 
 export async function createExpenseCategory(payload: { name: string; color: string }) {
-  const response = await fetch('/api/finance/categories/', {
+  const response = await apiFetch('/api/finance/categories/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -390,18 +409,18 @@ export async function createExpenseCategory(payload: { name: string; color: stri
 }
 
 export async function fetchAllFinanceExpenses() {
-  const response = await fetch('/api/finance/expenses/')
+  const response = await apiFetch('/api/finance/expenses/')
   const data = await readJson<{ expenses: FinanceExpenseRecord[] }>(response)
   return data.expenses
 }
 
 export async function deleteExpenseCategory(id: string) {
-  const response = await fetch(`/api/finance/categories/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/finance/categories/${id}/`, { method: 'DELETE' })
   return readJson<{ deleted: boolean }>(response)
 }
 
 export async function updateExpenseCategory(id: string, patch: { color?: string; name?: string }) {
-  const response = await fetch(`/api/finance/categories/${id}/`, {
+  const response = await apiFetch(`/api/finance/categories/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(patch),
@@ -410,7 +429,7 @@ export async function updateExpenseCategory(id: string, patch: { color?: string;
 }
 
 export async function createFinanceExpense(payload: FinanceExpensePayload) {
-  const response = await fetch('/api/finance/expenses/', {
+  const response = await apiFetch('/api/finance/expenses/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -420,7 +439,7 @@ export async function createFinanceExpense(payload: FinanceExpensePayload) {
 }
 
 export async function updateFinanceExpense(id: string, payload: FinanceExpensePayload) {
-  const response = await fetch(`/api/finance/expenses/${id}/`, {
+  const response = await apiFetch(`/api/finance/expenses/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -430,14 +449,14 @@ export async function updateFinanceExpense(id: string, payload: FinanceExpensePa
 }
 
 export async function deleteFinanceExpense(id: string) {
-  const response = await fetch(`/api/finance/expenses/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/finance/expenses/${id}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not delete expense.')
   }
 }
 
 export async function createLoan(payload: LoanPayload) {
-  const response = await fetch('/api/finance/loans/', {
+  const response = await apiFetch('/api/finance/loans/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -447,14 +466,14 @@ export async function createLoan(payload: LoanPayload) {
 }
 
 export async function deleteLoan(id: string) {
-  const response = await fetch(`/api/finance/loans/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/finance/loans/${id}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not delete loan.')
   }
 }
 
 export async function createFinancialObligation(payload: FinancialObligationPayload) {
-  const response = await fetch('/api/finance/obligations/', {
+  const response = await apiFetch('/api/finance/obligations/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -464,7 +483,7 @@ export async function createFinancialObligation(payload: FinancialObligationPayl
 }
 
 export async function updateFinancialObligation(id: string, payload: FinancialObligationPayload) {
-  const response = await fetch(`/api/finance/obligations/${id}/`, {
+  const response = await apiFetch(`/api/finance/obligations/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -474,24 +493,24 @@ export async function updateFinancialObligation(id: string, payload: FinancialOb
 }
 
 export async function deleteFinancialObligation(id: string) {
-  const response = await fetch(`/api/finance/obligations/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/finance/obligations/${id}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not delete obligation.')
   }
 }
 
-// ── Taxes ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Taxes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchTaxes(year?: number) {
   const params = new URLSearchParams()
   if (year) params.set('year', String(year))
-  const response = await fetch(`/api/finance/taxes/?${params.toString()}`)
+  const response = await apiFetch(`/api/finance/taxes/?${params.toString()}`)
   const data = await readJson<{ taxes: MonthlyTaxRecord[] }>(response)
   return data.taxes
 }
 
 export async function upsertTax(payload: MonthlyTaxPayload) {
-  const response = await fetch('/api/finance/taxes/', {
+  const response = await apiFetch('/api/finance/taxes/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -501,18 +520,18 @@ export async function upsertTax(payload: MonthlyTaxPayload) {
 }
 
 export async function deleteTax(id: string) {
-  const response = await fetch(`/api/finance/taxes/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/finance/taxes/${id}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not delete tax record.')
   }
 }
 
-// ── Maintenance ───────────────────────────────────────────────────────────────
+// â”€â”€ Maintenance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchMaintenanceIssues(propertyId?: string) {
   const params = new URLSearchParams()
   if (propertyId) params.set('property', propertyId)
-  const response = await fetch(`/api/maintenance/?${params.toString()}`)
+  const response = await apiFetch(`/api/maintenance/?${params.toString()}`)
   const data = await readJson<{ issues: MaintenanceIssueRecord[] }>(response)
   return data.issues
 }
@@ -525,13 +544,13 @@ export async function createMaintenanceIssue(payload: MaintenanceIssuePayload) {
   for (const photo of payload.photos || []) {
     formData.append('photos', photo)
   }
-  const response = await fetch('/api/maintenance/', { method: 'POST', body: formData })
+  const response = await apiFetch('/api/maintenance/', { method: 'POST', body: formData })
   const data = await readJson<{ issue: MaintenanceIssueRecord }>(response)
   return data.issue
 }
 
 export async function updateMaintenanceIssue(id: string, payload: { description: string }) {
-  const response = await fetch(`/api/maintenance/${id}/`, {
+  const response = await apiFetch(`/api/maintenance/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -541,29 +560,29 @@ export async function updateMaintenanceIssue(id: string, payload: { description:
 }
 
 export async function deleteMaintenanceIssue(id: string) {
-  const response = await fetch(`/api/maintenance/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/maintenance/${id}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not delete issue.')
   }
 }
 
 export async function deleteMaintenancePhoto(photoId: string) {
-  const response = await fetch(`/api/maintenance/photos/${photoId}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/maintenance/photos/${photoId}/`, { method: 'DELETE' })
   if (!response.ok) {
     throw new Error('Could not delete photo.')
   }
 }
 
-// ── Clean status ──────────────────────────────────────────────────────────────
+// â”€â”€ Clean status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchCleanStatuses() {
-  const response = await fetch('/api/clean-status/')
+  const response = await apiFetch('/api/clean-status/')
   const data = await readJson<{ cleanStatuses: CleanStatusRecord[] }>(response)
   return data.cleanStatuses
 }
 
 export async function markApartmentCleaned(propertyId: string, isCleaned: boolean) {
-  const response = await fetch(`/api/clean-status/${propertyId}/mark/`, {
+  const response = await apiFetch(`/api/clean-status/${propertyId}/mark/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ isCleaned }),
@@ -572,17 +591,17 @@ export async function markApartmentCleaned(propertyId: string, isCleaned: boolea
   return data.cleanStatus
 }
 
-// ── Sync Logs ─────────────────────────────────────────────────────────────────
+// â”€â”€ Sync Logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchSyncLogs(propertyId?: string) {
   const params = new URLSearchParams()
   if (propertyId) params.set('property', propertyId)
-  const response = await fetch(`/api/sync-logs/?${params.toString()}`)
+  const response = await apiFetch(`/api/sync-logs/?${params.toString()}`)
   const data = await readJson<{ syncLogs: SyncLogRecord[] }>(response)
   return data.syncLogs
 }
 
-// ── Payload types ─────────────────────────────────────────────────────────────
+// â”€â”€ Payload types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export type ReservationPayload = {
   guestName: string
@@ -698,7 +717,7 @@ export type MaintenanceIssuePayload = {
   photos?: File[]
 }
 
-// ── Receipts & Deposits ───────────────────────────────────────────────────────
+// â”€â”€ Receipts & Deposits â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchMonthlyReceipts(year: number, month: number) {
   const params = new URLSearchParams({
@@ -706,7 +725,7 @@ export async function fetchMonthlyReceipts(year: number, month: number) {
     year: String(year),
     month: String(month),
   })
-  const response = await fetch(`/api/receipts/?${params}`)
+  const response = await apiFetch(`/api/receipts/?${params}`)
   const data = await readJson<{
     days: import('../types/domain').DailyDayRecord[]
     totals: import('../types/domain').ReceiptTotals
@@ -720,7 +739,7 @@ export async function upsertDailyEntry(payload: {
   receiptLeft: boolean
   note: string
 }) {
-  const response = await fetch('/api/receipts/day/', {
+  const response = await apiFetch('/api/receipts/day/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...payload, platform: activePlatform() }),
@@ -731,7 +750,7 @@ export async function upsertDailyEntry(payload: {
 
 export async function fetchDayDetail(date: string) {
   const params = new URLSearchParams({ platform: activePlatform(), date })
-  const response = await fetch(`/api/receipts/day/detail/?${params}`)
+  const response = await apiFetch(`/api/receipts/day/detail/?${params}`)
   const data = await readJson<{
     entry: import('../types/domain').DailyDayRecord
     items: import('../types/domain').ReceiptItemRecord[]
@@ -745,7 +764,7 @@ export async function createReceiptItem(payload: {
   note: string
   reservationIds: string[]
 }) {
-  const response = await fetch('/api/receipts/items/', {
+  const response = await apiFetch('/api/receipts/items/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...payload, platform: activePlatform() }),
@@ -758,7 +777,7 @@ export async function updateReceiptItem(
   id: string,
   payload: { value: string; note: string; reservationIds: string[] },
 ) {
-  const response = await fetch(`/api/receipts/items/${id}/`, {
+  const response = await apiFetch(`/api/receipts/items/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -768,7 +787,7 @@ export async function updateReceiptItem(
 }
 
 export async function deleteReceiptItem(id: string) {
-  const response = await fetch(`/api/receipts/items/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/receipts/items/${id}/`, { method: 'DELETE' })
   if (!response.ok) throw new Error('Could not delete receipt item.')
 }
 
@@ -783,28 +802,28 @@ export async function fetchAvailableReservations(
     month: String(month),
   })
   if (currentItemId) params.set('currentItemId', currentItemId)
-  const response = await fetch(`/api/receipts/reservations/?${params}`)
+  const response = await apiFetch(`/api/receipts/reservations/?${params}`)
   const data = await readJson<{
     reservations: import('../types/domain').LinkedReservation[]
   }>(response)
   return data.reservations
 }
 
-// ── Booking Requests ──────────────────────────────────────────────────────────
+// â”€â”€ Booking Requests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchBookingRequests(offset = 0, limit = 10) {
   const params = new URLSearchParams({ offset: String(offset), limit: String(limit) })
-  const response = await fetch(`/api/booking-requests/?${params}`)
+  const response = await apiFetch(`/api/booking-requests/?${params}`)
   return readJson<{ pendingRequests: BookingRequestRecord[]; confirmedBookings: BookingRequestRecord[]; totalConfirmed: number }>(response)
 }
 
 export async function approveBookingRequest(id: string) {
-  const response = await fetch(`/api/booking-requests/${id}/approve/`, { method: 'POST' })
+  const response = await apiFetch(`/api/booking-requests/${id}/approve/`, { method: 'POST' })
   return readJson<{ request: BookingRequestRecord }>(response)
 }
 
 export async function rejectBookingRequest(id: string, rejectionMessage: string) {
-  const response = await fetch(`/api/booking-requests/${id}/reject/`, {
+  const response = await apiFetch(`/api/booking-requests/${id}/reject/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ rejectionMessage }),
@@ -812,16 +831,16 @@ export async function rejectBookingRequest(id: string, rejectionMessage: string)
   return readJson<{ request: BookingRequestRecord }>(response)
 }
 
-// ── Pricing Rules ─────────────────────────────────────────────────────────────
+// â”€â”€ Pricing Rules â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchPricingRules() {
-  const response = await fetch('/api/pricing-rules/')
+  const response = await apiFetch('/api/pricing-rules/')
   const data = await readJson<{ pricingRules: PricingRuleRecord[] }>(response)
   return data.pricingRules
 }
 
 export async function createPricingRule(payload: PricingRulePayload) {
-  const response = await fetch('/api/pricing-rules/', {
+  const response = await apiFetch('/api/pricing-rules/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -831,7 +850,7 @@ export async function createPricingRule(payload: PricingRulePayload) {
 }
 
 export async function updatePricingRule(id: string, payload: Partial<PricingRulePayload>) {
-  const response = await fetch(`/api/pricing-rules/${id}/`, {
+  const response = await apiFetch(`/api/pricing-rules/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -841,20 +860,20 @@ export async function updatePricingRule(id: string, payload: Partial<PricingRule
 }
 
 export async function deletePricingRule(id: string) {
-  const response = await fetch(`/api/pricing-rules/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/pricing-rules/${id}/`, { method: 'DELETE' })
   if (!response.ok) throw new Error('Could not delete pricing rule.')
 }
 
-// ── Promo Codes ───────────────────────────────────────────────────────────────
+// â”€â”€ Promo Codes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchPromoCodes() {
-  const response = await fetch('/api/promo-codes/')
+  const response = await apiFetch('/api/promo-codes/')
   const data = await readJson<{ promoCodes: PromoCodeRecord[] }>(response)
   return data.promoCodes
 }
 
 export async function createPromoCode(payload: PromoCodePayload) {
-  const response = await fetch('/api/promo-codes/', {
+  const response = await apiFetch('/api/promo-codes/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -864,7 +883,7 @@ export async function createPromoCode(payload: PromoCodePayload) {
 }
 
 export async function updatePromoCode(id: string, payload: Partial<PromoCodePayload>) {
-  const response = await fetch(`/api/promo-codes/${id}/`, {
+  const response = await apiFetch(`/api/promo-codes/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -874,20 +893,20 @@ export async function updatePromoCode(id: string, payload: Partial<PromoCodePayl
 }
 
 export async function deletePromoCode(id: string) {
-  const response = await fetch(`/api/promo-codes/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/promo-codes/${id}/`, { method: 'DELETE' })
   if (!response.ok) throw new Error('Could not delete promo code.')
 }
 
-// ── Cancellation Policies ─────────────────────────────────────────────────────
+// â”€â”€ Cancellation Policies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchCancellationPolicies() {
-  const response = await fetch('/api/cancellation-policies/')
+  const response = await apiFetch('/api/cancellation-policies/')
   const data = await readJson<{ policies: CancellationPolicyRecord[] }>(response)
   return data.policies
 }
 
 export async function createCancellationPolicy(payload: CancellationPolicyPayload) {
-  const response = await fetch('/api/cancellation-policies/', {
+  const response = await apiFetch('/api/cancellation-policies/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -897,7 +916,7 @@ export async function createCancellationPolicy(payload: CancellationPolicyPayloa
 }
 
 export async function updateCancellationPolicy(id: string, payload: Partial<CancellationPolicyPayload>) {
-  const response = await fetch(`/api/cancellation-policies/${id}/`, {
+  const response = await apiFetch(`/api/cancellation-policies/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -907,20 +926,20 @@ export async function updateCancellationPolicy(id: string, payload: Partial<Canc
 }
 
 export async function deleteCancellationPolicy(id: string) {
-  const response = await fetch(`/api/cancellation-policies/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/cancellation-policies/${id}/`, { method: 'DELETE' })
   if (!response.ok) throw new Error('Could not delete cancellation policy.')
 }
 
-// ── Amenities ─────────────────────────────────────────────────────────────────
+// â”€â”€ Amenities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchAmenities() {
-  const response = await fetch('/api/amenities/')
+  const response = await apiFetch('/api/amenities/')
   const data = await readJson<{ amenities: AmenityRecord[] }>(response)
   return data.amenities
 }
 
 export async function createAmenity(payload: { name: string; icon: string; sortOrder: number }) {
-  const response = await fetch('/api/amenities/', {
+  const response = await apiFetch('/api/amenities/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -930,7 +949,7 @@ export async function createAmenity(payload: { name: string; icon: string; sortO
 }
 
 export async function updateAmenity(id: string, payload: { name?: string; icon?: string; sortOrder?: number }) {
-  const response = await fetch(`/api/amenities/${id}/`, {
+  const response = await apiFetch(`/api/amenities/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -940,20 +959,20 @@ export async function updateAmenity(id: string, payload: { name?: string; icon?:
 }
 
 export async function deleteAmenity(id: string) {
-  const response = await fetch(`/api/amenities/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/amenities/${id}/`, { method: 'DELETE' })
   if (!response.ok) throw new Error('Could not delete amenity.')
 }
 
-// ── House Rules ───────────────────────────────────────────────────────────────
+// â”€â”€ House Rules â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchHouseRules() {
-  const response = await fetch('/api/house-rules/')
+  const response = await apiFetch('/api/house-rules/')
   const data = await readJson<{ houseRules: HouseRuleRecord[] }>(response)
   return data.houseRules
 }
 
 export async function createHouseRule(payload: { text: string; sortOrder: number; active: boolean }) {
-  const response = await fetch('/api/house-rules/', {
+  const response = await apiFetch('/api/house-rules/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -963,7 +982,7 @@ export async function createHouseRule(payload: { text: string; sortOrder: number
 }
 
 export async function updateHouseRule(id: string, payload: { text?: string; sortOrder?: number; active?: boolean }) {
-  const response = await fetch(`/api/house-rules/${id}/`, {
+  const response = await apiFetch(`/api/house-rules/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -973,20 +992,20 @@ export async function updateHouseRule(id: string, payload: { text?: string; sort
 }
 
 export async function deleteHouseRule(id: string) {
-  const response = await fetch(`/api/house-rules/${id}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/house-rules/${id}/`, { method: 'DELETE' })
   if (!response.ok) throw new Error('Could not delete house rule.')
 }
 
-// ── Booking Site Settings ─────────────────────────────────────────────────────
+// â”€â”€ Booking Site Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchPmsBookingSettings() {
-  const response = await fetch('/api/booking-settings/')
+  const response = await apiFetch('/api/booking-settings/')
   const data = await readJson<{ settings: BookingSiteSettingsRecord }>(response)
   return data.settings
 }
 
 export async function updatePmsBookingSettings(payload: Partial<BookingSiteSettingsRecord>) {
-  const response = await fetch('/api/booking-settings/', {
+  const response = await apiFetch('/api/booking-settings/', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -995,10 +1014,10 @@ export async function updatePmsBookingSettings(payload: Partial<BookingSiteSetti
   return data.settings
 }
 
-// ── Property Photos ───────────────────────────────────────────────────────────
+// â”€â”€ Property Photos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchPropertyPhotos(propertyId: string) {
-  const response = await fetch(`/api/properties/${propertyId}/photos/`)
+  const response = await apiFetch(`/api/properties/${propertyId}/photos/`)
   const data = await readJson<{ photos: PropertyPhotoRecord[] }>(response)
   return data.photos
 }
@@ -1007,7 +1026,7 @@ export async function uploadPropertyPhoto(propertyId: string, file: File, sortOr
   const formData = new FormData()
   formData.append('photo', file)
   if (sortOrder !== undefined) formData.append('sortOrder', String(sortOrder))
-  const response = await fetch(`/api/properties/${propertyId}/photos/`, {
+  const response = await apiFetch(`/api/properties/${propertyId}/photos/`, {
     method: 'POST',
     body: formData,
   })
@@ -1016,12 +1035,12 @@ export async function uploadPropertyPhoto(propertyId: string, file: File, sortOr
 }
 
 export async function deletePropertyPhoto(propertyId: string, photoId: string) {
-  const response = await fetch(`/api/properties/${propertyId}/photos/${photoId}/`, { method: 'DELETE' })
+  const response = await apiFetch(`/api/properties/${propertyId}/photos/${photoId}/`, { method: 'DELETE' })
   if (!response.ok) throw new Error('Could not delete photo.')
 }
 
 export async function reorderPropertyPhotos(propertyId: string, photos: { id: string; sortOrder: number }[]) {
-  const response = await fetch(`/api/properties/${propertyId}/photos/reorder/`, {
+  const response = await apiFetch(`/api/properties/${propertyId}/photos/reorder/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ photos }),
@@ -1031,7 +1050,7 @@ export async function reorderPropertyPhotos(propertyId: string, photos: { id: st
 }
 
 export async function updatePropertyAmenities(propertyId: string, amenityIds: string[]) {
-  const response = await fetch(`/api/properties/${propertyId}/amenities/`, {
+  const response = await apiFetch(`/api/properties/${propertyId}/amenities/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ amenityIds }),
@@ -1040,7 +1059,7 @@ export async function updatePropertyAmenities(propertyId: string, amenityIds: st
   return data.amenityIds
 }
 
-// ── Booking Engine Payload types ──────────────────────────────────────────────
+// â”€â”€ Booking Engine Payload types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export type PricingRulePayload = {
   ruleType: 'long_stay' | 'seasonal' | 'last_minute' | 'minimum_nights'

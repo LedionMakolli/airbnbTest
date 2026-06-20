@@ -20,14 +20,15 @@ function useStreakCanvas(canvasRef: RefObject<HTMLCanvasElement>) {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
+    const canvasEl = canvas
     const ctx = canvas.getContext('2d')!
     let animId: number
     let W = 0
     let H = 0
 
     function resize() {
-      W = canvas.width = window.innerWidth
-      H = canvas.height = window.innerHeight
+      W = canvasEl.width = window.innerWidth
+      H = canvasEl.height = window.innerHeight
     }
     resize()
     window.addEventListener('resize', resize)
