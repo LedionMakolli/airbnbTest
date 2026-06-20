@@ -6,3 +6,4 @@ typing_extensions==4.15.0
 tzdata==2026.2
 python-decouple==3.8
 django-cors-headers==4.3.1
+gunicorn==23.0.0
